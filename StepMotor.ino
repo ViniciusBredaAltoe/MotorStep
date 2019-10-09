@@ -1,35 +1,36 @@
-#define pot A0 
+#include <Stepper.h>
 
-int i,j, pins[] = {8,9,10,11}, bottomleft, bottomright, velocidade;
-float Ton = 0.5, Toff;
+#define STEPS 100
+#define resolution 2 //Averiguar!!
+
+ 
+
+Stepper stepper(STEPS, 8, 9, 10, 11);
+
+
+int fcr = 22;
+int fcl = 24;
+int botton_right = 26;
+int botton_go = 28;
+int bottom_left = 30;
+int bottom_mode = 32;
 
 void setup() {
-  for(i=0;i<4;i++)
-  {
-    pinMode(pins[i],OUTPUT); // Configura os pinos como saída
+  stepper.setSpeed(30); // set the speed of the motor to 30 RPMs
+  int cont = 0;
+  int Dmax;
+  while(digitalRead(fcr) == LOW){
+    stepper.step(1);
   }
-  pinMode(3, INPUT); //Direita
-  pinMode(4, INPUT); //Esquerda
-  velocidade = 500;
-  Toff = 1 - Ton;
+  while(digitalRead(fcl) == LOW){
+    stepper.step(-1);
+    cont++;
+  }
+  //Printar Cont
+  Dmax = cont*resolution;
+  cont = 0;
+  
 }
 
 void loop() {
-      
-  if(digitalRead(3) == HIGH && digitalRead(4) == LOW){ // Aciona o motor no sentido Horário
-    for(i=0;i<4;i++){  // Intercala o as bobinas acionadas
-       digitalWrite(pins[i],HIGH); // Envia um pulso de um passo
-       delay(velocidade*Ton); 
-       digitalWrite(pins[i],LOW);
-       delay(velocidade*Toff);
-    }
-  }
-  if(digitalRead(3) == LOW && digitalRead(4) == HIGH){ // Aciona o motor no sentido Anti-Horário
-    for(i=4;i>-1;i--){ // Intercala o as bobinas acionadas
-       digitalWrite(pins[i],HIGH); // Envia um pulso de um passo
-       delay(velocidade*Ton);
-       digitalWrite(pins[i],LOW); 
-       delay(velocidade*Toff);
-    }
-  }
 }
