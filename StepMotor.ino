@@ -30,11 +30,11 @@ void setup() {
   int cont = 0;
   while (digitalRead(fcr) == LOW)
   {
-    stepper.step(1);
+    stepper.step(1); // Vai para a direita
   }
   while (digitalRead(fcl) == LOW)
   {
-    stepper.step(-1);
+    stepper.step(-1); // Vai para a esquerda
     cont++;
   }
   //Printar Cont
@@ -61,20 +61,32 @@ void loop()
     case 0:
       break;
 
+
+// ======================================================  AUTOMATIC MODE =============================================================
+
+
     case 1: //Automático
       locus = posicao;
       while (digitalRead(botton_mode == LOW))
       {
+
+        
         //PRINTAR: Locus: (locus)
         //         Position: (posicao)
+        
+        
         if (digitalRead(botton_right == HIGH) && digitalRead(botton_left == LOW) && digitalRead(botton_go) == LOW) // Aumenta em 2mm o destino
         {
           locus = locus + resolution;
         }
+        
+        
         if (digitalRead(botton_left == HIGH) && digitalRead(botton_right == LOW) && digitalRead(botton_go) == LOW) // Diminui em 2mm o destino
         {
           locus = locus - resolution;
         }
+        
+        
         if (digitalRead(botton_go == HIGH) && digitalRead(botton_left == LOW) && digitalRead(botton_right) == LOW) // Inicia o movimento para o destido selecionado
         {
           if (locus > posicao) // Vai para a direita
@@ -84,6 +96,17 @@ void loop()
               //PRINT Impossible
               //      Operacion!
             }
+            else
+            {
+              while (digitalRead(fcr) == LOW && posicao != locus)
+              {
+                posicao = posicao + resolution;
+                //PRINTAR: Locus: (locus)
+                //         Position: (posicao)
+                stepper.step(1); // Vai para a direita
+
+              }
+            }
           }
           if (locus < posicao) // Vai para a esquerda
           {
@@ -92,10 +115,23 @@ void loop()
               //PRINT Impossible
               //      Operacion!
             }
+            else
+            {
+              while (digitalRead(fcl) == LOW && posicao != locus)
+              {
+                posicao = posicao - resolution;
+                //PRINTAR: Locus: (locus)
+                //         Position: (posicao)
+                stepper.step(-1); // Vai para a esquerda
+              }
+            }
           }
         }
       }
       break;
+
+
+// ======================================================  MANUAL MODE =============================================================
 
     case 2: //Manual
       while (digitalRead(botton_mode == LOW))
