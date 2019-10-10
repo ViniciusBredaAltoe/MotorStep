@@ -20,6 +20,8 @@ int cont; // Contagem de passos
 int Dmax; // Distancia máxima da origem [mm]
 
 //===== Bottons  with Debouce ===========
+
+
 int fcr_CurrentState = 0;
 int fcl_CurrentState = 0;
 int br_CurrentState = 0;
@@ -93,19 +95,21 @@ void loop()
         //         Position: (posicao)
 
 
-        if (digitalRead(botton_right) == HIGH && digitalRead(botton_left) == LOW && digitalRead(botton_go) == LOW) // Aumenta em 2mm o destino
+        if (digitalRead(bottom_go) == LOW)
         {
-          locus = locus + resolution;
+          if (digitalRead(botton_right) == HIGH && digitalRead(botton_left) == LOW) // Aumenta em 2mm o destino
+          {
+            locus = locus + resolution;
+          }
+
+
+          if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW) // Diminui em 2mm o destino
+          {
+            locus = locus - resolution;
+          }
         }
 
-
-        if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW && digitalRead(botton_go) == LOW) // Diminui em 2mm o destino
-        {
-          locus = locus - resolution;
-        }
-
-
-        if (digitalRead(botton_go) == HIGH && digitalRead(botton_left) == LOW && digitalRead(botton_right) == LOW) // Inicia o movimento para o destido selecionado
+        else // Inicia o movimento para o destido selecionado
         {
           if (locus > posicao) // Vai para a direita
           {
