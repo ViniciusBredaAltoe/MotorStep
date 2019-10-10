@@ -95,6 +95,7 @@ void loop()
             {
               //PRINT Impossible
               //      Operacion!
+              locus = posicao;
             }
             else
             {
@@ -114,6 +115,7 @@ void loop()
             {
               //PRINT Impossible
               //      Operacion!
+              locus = posicao;
             }
             else
             {
