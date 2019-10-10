@@ -34,17 +34,27 @@ void setup() {
   pinMode(botton_go, INPUT);
   pinMode(botton_left, INPUT);
   pinMode(botton_mode, INPUT);
+  pinMode(13, OUTPUT); // TEST PROTOBOARD
+  pinMode(12, OUTPUT); // TEST PROTOBOARD
 
   stepper.setSpeed(motorspeed);
   int cont = 0;
   while (digitalRead(fcr) == LOW)
   {
-    stepper.step(1); // Vai para a direita
+    //stepper.step(1); // Vai para a direita
+    digitalWrite(13, HIGH); // TEST PROTOBOARD
+    delay(1000); // TEST PROTOBOARD
+    digitalWrite(13, LOW); // TEST PROTOBOARD
+    delay(1000); // TEST PROTOBOARD
   }
   while (digitalRead(fcl) == LOW)
   {
-    stepper.step(-1); // Vai para a esquerda
+    //stepper.step(-1); // Vai para a esquerda
     cont++;
+    digitalWrite(12, HIGH); // TEST PROTOBOARD
+    delay(1000); // TEST PROTOBOARD
+    digitalWrite(12, LOW); // TEST PROTOBOARD
+    delay(1000); // TEST PROTOBOARD
   }
   //Printar Cont
   Dmax = cont * resolution;
@@ -115,7 +125,11 @@ void loop()
                 posicao = posicao + resolution;
                 //PRINTAR: Locus: (locus)
                 //         Position: (posicao)
-                stepper.step(1); // Vai para a direita
+                //stepper.step(1); // Vai para a direita
+                digitalWrite(13, HIGH); // TEST PROTOBOARD
+                delay(1000); // TEST PROTOBOARD
+                digitalWrite(13, LOW); // TEST PROTOBOARD
+                delay(1000); // TEST PROTOBOARD
 
               }
             }
@@ -135,7 +149,11 @@ void loop()
                 posicao = posicao - resolution;
                 //PRINTAR: Locus: (locus)
                 //         Position: (posicao)
-                stepper.step(-1); // Vai para a esquerda
+                //stepper.step(-1); // Vai para a esquerda
+                digitalWrite(12, HIGH); // TEST PROTOBOARD
+                delay(1000); // TEST PROTOBOARD
+                digitalWrite(12, LOW); // TEST PROTOBOARD
+                delay(1000); // TEST PROTOBOARD
               }
             }
           }
@@ -157,7 +175,11 @@ void loop()
           posicao = posicao + resolution;
           //PRINTAR: Position: (posicao)
           //         Máximo : (Dmax)
-          stepper.step(1);
+          //stepper.step(1);
+          digitalWrite(12, HIGH); // TEST PROTOBOARD
+          delay(1000); // TEST PROTOBOARD
+          digitalWrite(12, LOW); // TEST PROTOBOARD
+          delay(1000); // TEST PROTOBOARD
         }
 
 
@@ -166,7 +188,11 @@ void loop()
           posicao = posicao - resolution;
           //PRINTAR: Position: (posicao)
           //         Máximo : (Dmax)
-          stepper.step(-1);
+          //stepper.step(-1);
+          digitalWrite(12, HIGH); // TEST PROTOBOARD
+          delay(1000); // TEST PROTOBOARD
+          digitalWrite(12, LOW); // TEST PROTOBOARD
+          delay(1000); // TEST PROTOBOARD
         }
       }
       break;
