@@ -131,7 +131,7 @@ void loop()
               }
             }
           }
-          if (locus < posicao) // Vai para a esquerda
+          else // Vai para a esquerda
           {
             if (locus < 0)
             {
