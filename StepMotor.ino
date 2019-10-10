@@ -18,24 +18,12 @@ int locus; // Destino desejado
 int posicao; // Posição atual
 int cont; // Contagem de passos
 int Dmax; // Distancia máxima da origem [mm]
-int mode; // Modo de operação
+int mode;
 
 //===== Bottons  with Debouce ===========
 
 
-int fcr_CurrentState = 0;
-int fcl_CurrentState = 0;
-int br_CurrentState = 0;
-int go_CurrentState = 0;
-int bl_CurrentState = 0;
-int mode_CurrentState = 0;
 
-int fcr_lastState = 0;
-int fcl_lastState = 0;
-int br_lastState = 0;
-int go_lastState = 0;
-int bl_lastState = 0;
-int mode_lastState = 0; 
 
 
 
@@ -66,21 +54,14 @@ void setup() {
 
 void loop()
 {
-  fcr_CurrentState = digitalRead(fcr);
-  fcl_CurrentState = digitalRead(fcl);
-  br_CurrentState = digitalRead(botton_right);
-  go_CurrentState = digitalRead(botton_go);
-  bl_CurrentState = digitalRead(botton_left);
-  mode_CurrentState = digitalRead(botton_mode);
-
   mode = 0; //Reinicia o modo
   //PRINTAR: Escolha o modo:
   //         L:Manual  R:Auto
-  if (bl_CurrentState == LOW && br_CurrentState == HIGH)
+  if (digitalRead(botton_right) == HIGH && digitalRead(botton_right) == LOW)
   {
     mode = 1;
   }
-  if (bl_CurrentState == HIGH && br_CurrentState == LOW)
+  if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW)
   {
     mode = 2;
   }
@@ -95,7 +76,7 @@ void loop()
 
     case 1: //Automático
       locus = posicao;
-      while (mode_CurrentState == LOW)
+      while (digitalRead(botton_mode) == LOW)
       {
 
 
@@ -103,15 +84,15 @@ void loop()
         //         Position: (posicao)
 
 
-        if (go_CurrentState == LOW)
+        if (digitalRead(botton_go) == LOW)
         {
-          if (br_CurrentState == HIGH && bl_CurrentState == LOW) // Aumenta em 2mm o destino
+          if (digitalRead(botton_right) == HIGH && digitalRead(botton_left) == LOW) // Aumenta em 2mm o destino
           {
             locus = locus + resolution;
           }
 
 
-          if (bl_CurrentState == HIGH && br_CurrentState == LOW) // Diminui em 2mm o destino
+          if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW) // Diminui em 2mm o destino
           {
             locus = locus - resolution;
           }
@@ -166,12 +147,12 @@ void loop()
     // ================  MANUAL MODE =============
 
     case 2: //Manual
-      while (mode_CurrentState == LOW)
+      while (digitalRead(botton_mode) == LOW)
       {
         //PRINTAR: Position: (posicao)
         //         Máximo : (Dmax)
 
-        if (br_CurrentState == HIGH && bl_CurrentState == LOW) // Anda uma resolução para a direita
+        if (digitalRead(botton_right) == HIGH && digitalRead(botton_left) == LOW) // Anda uma resolução para a direita
         {
           posicao = posicao + resolution;
           //PRINTAR: Position: (posicao)
@@ -180,7 +161,7 @@ void loop()
         }
 
 
-        if (br_CurrentState == HIGH && br_CurrentState == LOW) // Anda uma resolução para a esquerda
+        if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW) // Anda uma resolução para a esquerda
         {
           posicao = posicao - resolution;
           //PRINTAR: Position: (posicao)
