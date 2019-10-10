@@ -2,7 +2,7 @@
 
 #define STEPS 100
 #define resolution 2 //Averiguar!!
-
+#define motorspeed 30 // set the speed of the motor to 30 RPMs
 
 
 Stepper stepper(STEPS, 8, 9, 10, 11);
@@ -14,11 +14,11 @@ const int botton_right = 26;
 const int botton_go = 28;
 const int botton_left = 30;
 const int botton_mode = 32;
-int mode;
-int locus;
-int posicao;
-int cont;
-int Dmax;
+int mode; // Modo de operação
+int locus; // Destino desejado
+int posicao; // Posição atual
+int cont; // Contagem de passos
+int Dmax; // Distancia máxima da origem [mm]
 
 void setup() {
   pinMode(botton_right, INPUT);
@@ -26,7 +26,7 @@ void setup() {
   pinMode(botton_left, INPUT);
   pinMode(botton_mode, INPUT);
 
-  stepper.setSpeed(30); // set the speed of the motor to 30 RPMs
+  stepper.setSpeed(motorspeed);
   int cont = 0;
   while (digitalRead(fcr) == LOW)
   {
@@ -62,7 +62,7 @@ void loop()
       break;
 
 
-// ======================================================  AUTOMATIC MODE =============================================================
+    // ======================================================  AUTOMATIC MODE =============================================================
 
 
     case 1: //Automático
@@ -70,23 +70,23 @@ void loop()
       while (digitalRead(botton_mode == LOW))
       {
 
-        
+
         //PRINTAR: Locus: (locus)
         //         Position: (posicao)
-        
-        
+
+
         if (digitalRead(botton_right == HIGH) && digitalRead(botton_left == LOW) && digitalRead(botton_go) == LOW) // Aumenta em 2mm o destino
         {
           locus = locus + resolution;
         }
-        
-        
+
+
         if (digitalRead(botton_left == HIGH) && digitalRead(botton_right == LOW) && digitalRead(botton_go) == LOW) // Diminui em 2mm o destino
         {
           locus = locus - resolution;
         }
-        
-        
+
+
         if (digitalRead(botton_go == HIGH) && digitalRead(botton_left == LOW) && digitalRead(botton_right) == LOW) // Inicia o movimento para o destido selecionado
         {
           if (locus > posicao) // Vai para a direita
@@ -133,12 +133,30 @@ void loop()
       break;
 
 
-// ======================================================  MANUAL MODE =============================================================
+    // ======================================================  MANUAL MODE =============================================================
 
     case 2: //Manual
       while (digitalRead(botton_mode == LOW))
       {
+        //PRINTAR: Position: (posicao)
+        //         Máximo : (Dmax)
 
+        if (digitalRead(botton_right == HIGH) && digitalRead(botton_left == LOW) && digitalRead(botton_go) == LOW) // Anda uma resolução para a direita
+        {
+          posicao = posicao + resolution;
+          //PRINTAR: Position: (posicao)
+          //         Máximo : (Dmax)
+          stepper.step(1);
+        }
+
+
+        if (digitalRead(botton_left == HIGH) && digitalRead(botton_right == LOW) && digitalRead(botton_go) == LOW) // Anda uma resolução para a esquerda
+        {
+          posicao = posicao - resolution;
+          //PRINTAR: Position: (posicao)
+          //         Máximo : (Dmax)
+          stepper.step(-1);
+        }
       }
       break;
 
