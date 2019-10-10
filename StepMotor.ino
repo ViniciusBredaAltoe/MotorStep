@@ -14,17 +14,35 @@ const int botton_right = 26;
 const int botton_go = 28;
 const int botton_left = 30;
 const int botton_mode = 32;
-int mode; // Modo de operação
 int locus; // Destino desejado
 int posicao; // Posição atual
 int cont; // Contagem de passos
 int Dmax; // Distancia máxima da origem [mm]
 
+//===== Bottons  with Debouce ===========
+int fcr_CurrentState = 0;
+int fcl_CurrentState = 0;
+int br_CurrentState = 0;
+int go_CurrentState = 0;
+int bl_CurrentState = 0;
+int mode_CurrentState = 0; // Modo de operação
+
+int fcr_lastState = 0;
+int fcl_lastState = 0;
+int br_lastState = 0;
+int go_lastState = 0;
+int bl_lastState = 0;
+int mode_lastState = 0; // Modo de operação
+
+
+
 void setup() {
-  pinMode(botton_right, INPUT);
-  pinMode(botton_go, INPUT);
-  pinMode(botton_left, INPUT);
-  pinMode(botton_mode, INPUT);
+  fcr_CurrentState = pinMode(fcr, INPUT);
+  fcl_CurrentState = pinMode(fcl, INPUT);
+  br_CurrentState = pinMode(botton_right, INPUT);
+  go_CurrentState = pinMode(botton_go, INPUT);
+  bl_CurrentState = pinMode(botton_left, INPUT);
+  mode_CurrentState = pinMode(botton_mode, INPUT);
 
   stepper.setSpeed(motorspeed);
   int cont = 0;
@@ -62,7 +80,7 @@ void loop()
       break;
 
 
-    // ======================================================  AUTOMATIC MODE =============================================================
+    // ========= AUTOMATIC MODE ===========
 
 
     case 1: //Automático
@@ -133,7 +151,7 @@ void loop()
       break;
 
 
-    // ======================================================  MANUAL MODE =============================================================
+    // ================  MANUAL MODE =============
 
     case 2: //Manual
       while (digitalRead(botton_mode) == LOW)
