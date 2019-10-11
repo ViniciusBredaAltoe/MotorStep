@@ -17,13 +17,8 @@ const int botton_mode = 32;
 int locus; // Destino desejado
 int posicao; // Posição atual
 int cont; // Contagem de passos
-int Dmax; // Distancia máxima da origem [mm]
+int Max; // Distancia máxima da origem [mm]
 int mode;
-
-//===== Bottons  with Debouce ===========
-
-
-
 
 
 
@@ -34,46 +29,57 @@ void setup() {
   pinMode(botton_go, INPUT);
   pinMode(botton_left, INPUT);
   pinMode(botton_mode, INPUT);
-  pinMode(13, OUTPUT); // TEST PROTOBOARD
-  pinMode(12, OUTPUT); // TEST PROTOBOARD
 
   stepper.setSpeed(motorspeed);
   int cont = 0;
+
+  Serial.begin(9600); // TEST PROTOBOARD
+}
+
+
+
+int Initialization(int Dmax)
+{
   while (digitalRead(fcr) == LOW)
   {
     //stepper.step(1); // Vai para a direita
-    digitalWrite(13, HIGH); // TEST PROTOBOARD
-    delay(1000); // TEST PROTOBOARD
-    digitalWrite(13, LOW); // TEST PROTOBOARD
-    delay(1000); // TEST PROTOBOARD
+    Serial.print("Direita \n"); // TEST PROTOBOARD
+    delay(2000); // TEST PROTOBOARD
+
   }
   while (digitalRead(fcl) == LOW)
   {
     //stepper.step(-1); // Vai para a esquerda
     cont++;
-    digitalWrite(12, HIGH); // TEST PROTOBOARD
-    delay(1000); // TEST PROTOBOARD
-    digitalWrite(12, LOW); // TEST PROTOBOARD
-    delay(1000); // TEST PROTOBOARD
+    Serial.print("Esquerda  \n"); // TEST PROTOBOARD
+    delay(2000); // TEST PROTOBOARD
   }
   //Printar Cont
   Dmax = cont * resolution;
-  cont = 0;
-  posicao = 0;
+  return Dmax;
 }
 
 void loop()
 {
+  if (cont == 0)
+  {
+    Initialization(Max);
+    cont = 1;
+  }
   mode = 0; //Reinicia o modo
   //PRINTAR: Escolha o modo:
   //         L:Manual  R:Auto
-  if (digitalRead(botton_right) == HIGH && digitalRead(botton_right) == LOW)
+  if (digitalRead(botton_right) == HIGH and digitalRead(botton_left) == LOW)
   {
     mode = 1;
+    Serial.print("AutoDireita_  \n"); // TEST PROTOBOARD
+    delay(2000); // TEST PROTOBOARD
   }
-  if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW)
+  if (digitalRead(botton_left) == HIGH and digitalRead(botton_right) == LOW)
   {
     mode = 2;
+    Serial.print("ManualEsquerda_  \n"); // TEST PROTOBOARD
+    delay(2000); // TEST PROTOBOARD
   }
   switch (mode)
   {
@@ -96,15 +102,20 @@ void loop()
 
         if (digitalRead(botton_go) == LOW)
         {
-          if (digitalRead(botton_right) == HIGH && digitalRead(botton_left) == LOW) // Aumenta em 2mm o destino
+          if (digitalRead(botton_right) == HIGH and digitalRead(botton_left) == LOW) // Aumenta em 2mm o destino
           {
             locus = locus + resolution;
+            Serial.print("DireitaA  \n"); // TEST PROTOBOARD
+            delay(2000); // TEST PROTOBOARD
+
           }
 
 
-          if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW) // Diminui em 2mm o destino
+          if (digitalRead(botton_left) == HIGH and digitalRead(botton_right) == LOW) // Diminui em 2mm o destino
           {
             locus = locus - resolution;
+            Serial.print("EsquerdaA  \n"); // TEST PROTOBOARD
+            delay(2000); // TEST PROTOBOARD
           }
         }
 
@@ -112,7 +123,7 @@ void loop()
         {
           if (locus > posicao) // Vai para a direita
           {
-            if (locus > Dmax)
+            if (locus > Max)
             {
               //PRINT Impossible
               //      Operacion!
@@ -120,16 +131,14 @@ void loop()
             }
             else
             {
-              while (digitalRead(fcr) == LOW && posicao != locus)
+              while (digitalRead(fcr) == LOW and posicao != locus)
               {
                 posicao = posicao + resolution;
                 //PRINTAR: Locus: (locus)
                 //         Position: (posicao)
                 //stepper.step(1); // Vai para a direita
-                digitalWrite(13, HIGH); // TEST PROTOBOARD
-                delay(1000); // TEST PROTOBOARD
-                digitalWrite(13, LOW); // TEST PROTOBOARD
-                delay(1000); // TEST PROTOBOARD
+                Serial.print("Direita  \n"); // TEST PROTOBOARD
+                delay(2000); // TEST PROTOBOARD
 
               }
             }
@@ -144,16 +153,14 @@ void loop()
             }
             else
             {
-              while (digitalRead(fcl) == LOW && posicao != locus)
+              while (digitalRead(fcl) == LOW and posicao != locus)
               {
                 posicao = posicao - resolution;
                 //PRINTAR: Locus: (locus)
                 //         Position: (posicao)
                 //stepper.step(-1); // Vai para a esquerda
-                digitalWrite(12, HIGH); // TEST PROTOBOARD
-                delay(1000); // TEST PROTOBOARD
-                digitalWrite(12, LOW); // TEST PROTOBOARD
-                delay(1000); // TEST PROTOBOARD
+                Serial.print("Esquerda  \n"); // TEST PROTOBOARD
+                delay(2000); // TEST PROTOBOARD
               }
             }
           }
@@ -168,31 +175,27 @@ void loop()
       while (digitalRead(botton_mode) == LOW)
       {
         //PRINTAR: Position: (posicao)
-        //         Máximo : (Dmax)
+        //         Máximo : (Max)
 
-        if (digitalRead(botton_right) == HIGH && digitalRead(botton_left) == LOW) // Anda uma resolução para a direita
+        if (digitalRead(botton_right) == HIGH and digitalRead(botton_left) == LOW) // Anda uma resolução para a direita
         {
           posicao = posicao + resolution;
           //PRINTAR: Position: (posicao)
-          //         Máximo : (Dmax)
+          //         Máximo : (Max)
           //stepper.step(1);
-          digitalWrite(12, HIGH); // TEST PROTOBOARD
-          delay(1000); // TEST PROTOBOARD
-          digitalWrite(12, LOW); // TEST PROTOBOARD
-          delay(1000); // TEST PROTOBOARD
+          Serial.print("Direita  \n"); // TEST PROTOBOARD
+          delay(2000); // TEST PROTOBOARD
         }
 
 
-        if (digitalRead(botton_left) == HIGH && digitalRead(botton_right) == LOW) // Anda uma resolução para a esquerda
+        if (digitalRead(botton_left) == HIGH and digitalRead(botton_right) == LOW) // Anda uma resolução para a esquerda
         {
           posicao = posicao - resolution;
           //PRINTAR: Position: (posicao)
-          //         Máximo : (Dmax)
+          //         Máximo : (Max)
           //stepper.step(-1);
-          digitalWrite(12, HIGH); // TEST PROTOBOARD
-          delay(1000); // TEST PROTOBOARD
-          digitalWrite(12, LOW); // TEST PROTOBOARD
-          delay(1000); // TEST PROTOBOARD
+          Serial.print("Esquerda  \n"); // TEST PROTOBOARD
+          delay(2000); // TEST PROTOBOARD
         }
       }
       break;
