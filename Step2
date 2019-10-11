@@ -117,6 +117,9 @@ void loop()
     switch (mode)
     {
       case 0: // Nenhum modo selecionado
+
+        Serial.print("Escolha o modo\n"); // TEST PROTOBOARD
+
         //PRINTAR: ESCOLHA O MODO
         //         L:MANUAL R:AUTO
         if (right == 1) {
