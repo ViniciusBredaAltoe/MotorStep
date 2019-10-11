@@ -1,12 +1,12 @@
 #include <Stepper.h>
 
 #define STEPS 100
-#define resolution 2 //Averiguar!!
 #define motorspeed 30 // set the speed of the motor to 30 RPMs
 
 
 Stepper stepper(STEPS, 8, 9, 10, 11);
 
+const int resolution = 2; //Averiguar!!
 
 const int fcr = 22; // Fim de curso Right
 const int fcl = 24; // Fim de curso Left
@@ -19,7 +19,7 @@ int posicao; // Posição atual
 int cont; // Contagem de passos
 int Max; // Distancia máxima da origem [mm]
 int mode;
-
+int verificador1;
 
 
 void setup() {
@@ -31,15 +31,17 @@ void setup() {
   pinMode(botton_mode, INPUT);
 
   stepper.setSpeed(motorspeed);
-  int cont = 0;
+  int verificador1 = 0;
 
   Serial.begin(9600); // TEST PROTOBOARD
 }
 
 
 
-int Initialization(int Dmax)
+int Initialization()
 {
+  int Dmax;
+  cont = 0;
   while (digitalRead(fcr) == LOW)
   {
     //stepper.step(1); // Vai para a direita
@@ -61,12 +63,16 @@ int Initialization(int Dmax)
 
 void loop()
 {
-  if (cont == 0)
+  if (verificador1 == 0) // Verifica se a inicialização ja foi feita
   {
-    Initialization(Max);
-    cont = 1;
+    Max = Initialization();
+    Serial.print("A distancia máxima da origem é: "); // TEST PROTOBOARD
+    Serial.print(Max); // TEST PROTOBOARD
+    Serial.print("\n"); // TEST PROTOBOARD
+    verificador1 = 1;
   }
   mode = 0; //Reinicia o modo
+  //Serial.print("Escolha o modo:  \nL:Manual  R:Auto\n "); // TEST PROTOBOARD
   //PRINTAR: Escolha o modo:
   //         L:Manual  R:Auto
   if (digitalRead(botton_right) == HIGH and digitalRead(botton_left) == LOW)
@@ -95,7 +101,9 @@ void loop()
       while (digitalRead(botton_mode) == LOW)
       {
 
-
+        //        Serial.print("locus = "); // TEST PROTOBOARD
+        //        Serial.print(locus); // TEST PROTOBOARD
+        //        Serial.print("\n"); //TEST PROTOBOARD
         //PRINTAR: Locus: (locus)
         //         Position: (posicao)
 
@@ -105,7 +113,9 @@ void loop()
           if (digitalRead(botton_right) == HIGH and digitalRead(botton_left) == LOW) // Aumenta em 2mm o destino
           {
             locus = locus + resolution;
-            Serial.print("DireitaA  \n"); // TEST PROTOBOARD
+            Serial.print("DireitaA locus = "); // TEST PROTOBOARD
+            Serial.print(locus); // TEST PROTOBOARD
+            Serial.print("\n"); //TEST PROTOBOARD
             delay(2000); // TEST PROTOBOARD
 
           }
@@ -114,7 +124,9 @@ void loop()
           if (digitalRead(botton_left) == HIGH and digitalRead(botton_right) == LOW) // Diminui em 2mm o destino
           {
             locus = locus - resolution;
-            Serial.print("EsquerdaA  \n"); // TEST PROTOBOARD
+            Serial.print("EsquerdaA locus = "); // TEST PROTOBOARD
+            Serial.print(locus); // TEST PROTOBOARD
+            Serial.print("\n"); //TEST PROTOBOARD
             delay(2000); // TEST PROTOBOARD
           }
         }
