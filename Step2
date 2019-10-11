@@ -1,0 +1,149 @@
+#include <Stepper.h>
+
+#define STEPS 100
+#define motorspeed 30 // set the speed of the motor to 30 RPMs
+
+
+Stepper stepper(STEPS, 8, 9, 10, 11);
+
+
+// ==================================================================== Acerto da Pinagem =================================================
+
+const int fcr = 22; // Fim de curso Right
+const int fcl = 24; // Fim de curso Left
+const int botton_right = 26;
+const int botton_go = 28;
+const int botton_left = 30;
+const int botton_mode = 32;
+
+// =================================================================== Variaveis Externas =================================================
+
+const int resolution = 2; //Averiguar!!
+
+// =================================================================== Variáveis Internas =================================================
+
+int right;
+int left;
+int go;
+int bmode;
+
+int locus; // Destino desejado
+int posicao; // Posição atual
+int Max; // Distancia máxima da origem [mm]
+int mode;
+
+// ================================================================== Variáveis de Status =================================================
+
+int status1;
+int status_br;
+int status_go;
+int status_bl;
+int status_mode;
+
+// ======================================================================= VOID SETUP =====================================================
+
+void setup() {
+  pinMode(fcr, INPUT);
+  pinMode(fcl, INPUT);
+  pinMode(botton_right, INPUT);
+  pinMode(botton_go, INPUT);
+  pinMode(botton_left, INPUT);
+  pinMode(botton_mode, INPUT);
+
+  stepper.setSpeed(motorspeed);
+  int verificador1 = 0;
+
+  Serial.begin(9600); // TEST PROTOBOARD
+}
+
+// ===================================================================== INICIALIZAÇÃO ====================================================
+
+int Initialization()
+{
+  int Dmax;
+  int cont = 0;
+  while (digitalRead(fcr) == LOW)
+  {
+    //stepper.step(1); // Vai para a direita
+    Serial.print(" Inicialização Direita \n"); // TEST PROTOBOARD
+    delay(1000); // TEST PROTOBOARD
+
+  }
+  while (digitalRead(fcl) == LOW)
+  {
+    //stepper.step(-1); // Vai para a esquerda
+    cont++;
+    Serial.print("Inicialização Esquerda  \n"); // TEST PROTOBOARD
+    delay(1000); // TEST PROTOBOARD
+  }
+  //Printar Cont
+  Dmax = cont * resolution;
+  return Dmax;
+}
+
+// ================================================================== BOTAO STATUS =======================================================
+
+int botton_status (int botton, int status_botton)
+{
+  status_botton = digitalRead(botton);
+  if (status_botton != LOW)
+  {
+    if (status_botton == HIGH) {
+      status_botton = 1;
+    }
+    delay(50);
+  }
+  return status_botton;
+}
+
+// ===================================================================== VOID LOOP =======================================================
+
+void loop()
+{
+  if (status1 == 0) // Verifica se a inicialização ja foi feita (0 = não e 1 = sim)
+  {
+    Max = Initialization();
+    Serial.print("A distancia máxima da origem é: "); // TEST PROTOBOARD
+    Serial.print(Max); // TEST PROTOBOARD
+    Serial.print("\n"); // TEST PROTOBOARD
+    bmode = 1;
+    mode = 0;
+    status1 = 1;
+  }
+
+  if ((right + left + go + bmode) == 1)
+  {
+    if (bmode == 1) mode = 0; //Reinicia o modo.
+    switch (mode)
+    {
+      case 0: // Nenhum modo selecionado
+        //PRINTAR: ESCOLHA O MODO
+        //         L:MANUAL R:AUTO
+        if (right == 1) mode = 1;
+        if (left == 1) mode = 2;
+        break;
+
+      // ------= Modo Automético =------
+
+      case 1: // Modo Automático
+
+        break;
+
+      // --------= Modo Manual =--------
+
+      case 2: // Modo Manual
+
+        break;
+    }
+  }
+  right = 0;
+  left = 0;
+  go = 0;
+  bmode = 0;
+
+  right = botton_status(botton_right, status_br);
+  left = botton_status(botton_left, status_bl);
+  go = botton_status(botton_go, status_go);
+  bmode = botton_status(botton_mode, status_mode);
+
+}
