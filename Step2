@@ -7,7 +7,7 @@
 Stepper stepper(STEPS, 8, 9, 10, 11);
 
 
-// ==================================================================== Acerto da Pinagem =================================================
+// =============================================================== Acerto da Pinagem ======================================================
 
 const int fcr = 22; // Fim de curso Right
 const int fcl = 24; // Fim de curso Left
@@ -16,11 +16,11 @@ const int botton_go = 28;
 const int botton_left = 30;
 const int botton_mode = 32;
 
-// =================================================================== Variaveis Externas =================================================
+// =============================================================== Variaveis Externas =====================================================
 
 const int resolution = 2; //Averiguar!!
 
-// =================================================================== Variáveis Internas =================================================
+// =============================================================== Variáveis Internas =====================================================
 
 int right;
 int left;
@@ -30,9 +30,9 @@ int bmode;
 int locus; // Destino desejado
 int posicao; // Posição atual
 int Max; // Distancia máxima da origem [mm]
-int mode;
+int mode; // Modo de operação (0, 1 ou 2)
 
-// ================================================================== Variáveis de Status =================================================
+// =============================================================== Variáveis de Status ====================================================
 
 int status1;
 int status_br;
@@ -40,7 +40,7 @@ int status_go;
 int status_bl;
 int status_mode;
 
-// ======================================================================= VOID SETUP =====================================================
+// =================================================================== VOID SETUP =========================================================
 
 void setup() {
   pinMode(fcr, INPUT);
@@ -56,7 +56,7 @@ void setup() {
   Serial.begin(9600); // TEST PROTOBOARD
 }
 
-// ===================================================================== INICIALIZAÇÃO ====================================================
+// ================================================================= INICIALIZAÇÃO ========================================================
 
 int Initialization()
 {
@@ -119,20 +119,101 @@ void loop()
       case 0: // Nenhum modo selecionado
         //PRINTAR: ESCOLHA O MODO
         //         L:MANUAL R:AUTO
-        if (right == 1) mode = 1;
+        if (right == 1) {
+          mode = 1;
+          locus = posicao;
+        }
         if (left == 1) mode = 2;
         break;
 
-      // ------= Modo Automético =------
+      // -----------------------------------------------------------= Modo Automático =---------------------------------------------------
 
       case 1: // Modo Automático
+        if (right == 1 and locus < Max)
+        {
+          locus = locus + resolution;
 
+          Serial.print("DireitaA locus = "); // TEST PROTOBOARD
+          Serial.print(locus); // TEST PROTOBOARD
+          Serial.print("\n"); //TEST PROTOBOARD
+          delay(2000); // TEST PROTOBOARD
+        }
+        else if (left == 1 and locus > 0)
+        {
+          locus = locus - resolution;
+          Serial.print("EsquerdaA locus = "); // TEST PROTOBOARD
+          Serial.print(locus); // TEST PROTOBOARD
+          Serial.print("\n"); //TEST PROTOBOARD
+          delay(2000); // TEST PROTOBOARD
+        }
+        else if (go == 1)
+        {
+          while (posicao < locus) // Vai para a direita
+          {
+            posicao = posicao + resolution;
+            //PRINTAR: Locus: (locus)
+            //         Position: (posicao)
+
+            //stepper.step(1); // Vai para a direita
+
+            Serial.print("Direita  \n"); // TEST PROTOBOARD
+            delay(2000); // TEST PROTOBOARD
+          }
+          while (posicao > locus)
+          {
+            posicao = posicao - resolution;
+            //PRINTAR: Locus: (locus)
+            //         Position: (posicao)
+
+            //stepper.step(-1); // Vai para a esquerda
+
+            Serial.print("Esquerda  \n"); // TEST PROTOBOARD
+            delay(2000); // TEST PROTOBOARD
+          }
+
+
+        }
+        else
+        {
+          //PRINT Impossible
+          //      Operacion!
+        }
         break;
 
-      // --------= Modo Manual =--------
+      // -------------------------------------------------------------= Modo Manual =-----------------------------------------------------
 
       case 2: // Modo Manual
 
+        //PRINTAR: Position: (posicao)
+        //         Máximo : (Max)
+
+        if (right == 1 and digitalRead(fcr) == LOW)
+        {
+          posicao = posicao + resolution;
+          //stepper.step(1);
+
+          //PRINTAR: Position: (posicao)
+          //         Máximo : (Max)
+
+          Serial.print("Direita  \n"); // TEST PROTOBOARD
+          delay(2000); // TEST PROTOBOARD
+        }
+        else if (left == 1 and digitalRead(fcl) == LOW)
+        {
+          posicao = posicao - resolution;
+          //stepper.step(-1);
+
+          //PRINTAR: Position: (posicao)
+          //         Máximo : (Max)
+
+          Serial.print("Esquerda  \n"); // TEST PROTOBOARD
+          delay(2000); // TEST PROTOBOARD
+        }
+        else
+        {
+          //PRINT Impossible
+          //      Operacion!
+        }
         break;
     }
   }
