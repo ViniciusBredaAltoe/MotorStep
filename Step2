@@ -11,15 +11,16 @@ Stepper stepper(STEPS, 8, 9, 10, 11);
 
 const int fcr = 22; // Fim de curso Right
 const int fcl = 24; // Fim de curso Left
-const int botton_right = 26;
-const int botton_go = 28;
-const int botton_left = 30;
-const int botton_mode = 32;
+const int botton_mode = 52;
+const int botton_right = 50;
+const int botton_go = 48;
+const int botton_left = 46;
+
 
 // =============================================================== Variaveis Externas =====================================================
 
 const int resolution = 2; //Averiguar!!
-
+const int velocidade_botton = 1000;
 // =============================================================== Variáveis Internas =====================================================
 
 int right;
@@ -43,15 +44,15 @@ int status_mode;
 // =================================================================== VOID SETUP =========================================================
 
 void setup() {
-  pinMode(fcr, INPUT);
-  pinMode(fcl, INPUT);
-  pinMode(botton_right, INPUT);
-  pinMode(botton_go, INPUT);
-  pinMode(botton_left, INPUT);
-  pinMode(botton_mode, INPUT);
+  pinMode(fcr, INPUT_PULLUP);
+  pinMode(fcl, INPUT_PULLUP);
+  pinMode(botton_right, INPUT_PULLUP);
+  pinMode(botton_go, INPUT_PULLUP);
+  pinMode(botton_left, INPUT_PULLUP);
+  pinMode(botton_mode, INPUT_PULLUP);
 
   stepper.setSpeed(motorspeed);
-  int verificador1 = 0;
+  int status1 = 0;
 
   Serial.begin(9600); // TEST PROTOBOARD
 }
@@ -62,14 +63,14 @@ int Initialization()
 {
   int Dmax;
   int cont = 0;
-  while (digitalRead(fcr) == LOW)
+  while (digitalRead(fcr) == HIGH)
   {
     //stepper.step(1); // Vai para a direita
-    Serial.print(" Inicialização Direita \n"); // TEST PROTOBOARD
+    Serial.print("Inicialização Direita \n"); // TEST PROTOBOARD
     delay(1000); // TEST PROTOBOARD
 
   }
-  while (digitalRead(fcl) == LOW)
+  while (digitalRead(fcl) == HIGH)
   {
     //stepper.step(-1); // Vai para a esquerda
     cont++;
@@ -86,12 +87,13 @@ int Initialization()
 int botton_status (int botton, int status_botton)
 {
   status_botton = digitalRead(botton);
-  if (status_botton != LOW)
+  if (status_botton != HIGH)
   {
-    if (status_botton == HIGH) {
-      status_botton = 1;
-    }
     delay(50);
+    if (status_botton == LOW) {
+      status_botton = 0;
+    }
+
   }
   return status_botton;
 }
@@ -100,20 +102,23 @@ int botton_status (int botton, int status_botton)
 
 void loop()
 {
-  if (status1 == 0) // Verifica se a inicialização ja foi feita (0 = não e 1 = sim)
+  if (status1 == 0) // Verifica se a inicialização ja foi feita (0 = sim e 1 = não)
   {
     Max = Initialization();
     Serial.print("A distancia máxima da origem é: "); // TEST PROTOBOARD
     Serial.print(Max); // TEST PROTOBOARD
     Serial.print("\n"); // TEST PROTOBOARD
-    bmode = 1;
     mode = 0;
     status1 = 1;
+    right = 1;
+    left = 1;
+    go = 1;
+    bmode = 0;
   }
 
-  if ((right + left + go + bmode) == 1)
+  if ((right + left + go + bmode) == 3)
   {
-    if (bmode == 1) mode = 0; //Reinicia o modo.
+    if (bmode == 0) mode = 0; //Reinicia o modo.
     switch (mode)
     {
       case 0: // Nenhum modo selecionado
@@ -122,34 +127,39 @@ void loop()
 
         //PRINTAR: ESCOLHA O MODO
         //         L:MANUAL R:AUTO
-        if (right == 1) {
+        if (right == 0) {
+          Serial.print("Direita Escolhido\n"); // TEST PROTOBOARD
           mode = 1;
           locus = posicao;
         }
-        if (left == 1) mode = 2;
+        if (left == 0) {
+          Serial.print("Esquerda Escolhido\n"); // TEST PROTOBOARD
+          mode = 2;
+        }
+        delay(500);
         break;
 
       // -----------------------------------------------------------= Modo Automático =---------------------------------------------------
 
       case 1: // Modo Automático
-        if (right == 1 and locus < Max)
+        if (right == 0 and locus < Max)
         {
           locus = locus + resolution;
 
           Serial.print("DireitaA locus = "); // TEST PROTOBOARD
           Serial.print(locus); // TEST PROTOBOARD
           Serial.print("\n"); //TEST PROTOBOARD
-          delay(2000); // TEST PROTOBOARD
+          delay(velocidade_botton);
         }
-        else if (left == 1 and locus > 0)
+        else if (left == 0 and locus > 1)
         {
           locus = locus - resolution;
           Serial.print("EsquerdaA locus = "); // TEST PROTOBOARD
           Serial.print(locus); // TEST PROTOBOARD
           Serial.print("\n"); //TEST PROTOBOARD
-          delay(2000); // TEST PROTOBOARD
+          delay(velocidade_botton);
         }
-        else if (go == 1)
+        else if (go == 0)
         {
           while (posicao < locus) // Vai para a direita
           {
@@ -160,7 +170,7 @@ void loop()
             //stepper.step(1); // Vai para a direita
 
             Serial.print("Direita  \n"); // TEST PROTOBOARD
-            delay(2000); // TEST PROTOBOARD
+            delay(velocidade_botton); // TEST PROTOBOARD
           }
           while (posicao > locus)
           {
@@ -171,10 +181,8 @@ void loop()
             //stepper.step(-1); // Vai para a esquerda
 
             Serial.print("Esquerda  \n"); // TEST PROTOBOARD
-            delay(2000); // TEST PROTOBOARD
+            delay(velocidade_botton);
           }
-
-
         }
         else
         {
@@ -190,7 +198,7 @@ void loop()
         //PRINTAR: Position: (posicao)
         //         Máximo : (Max)
 
-        if (right == 1 and digitalRead(fcr) == LOW)
+        if (right == 0 and digitalRead(fcr) == HIGH)
         {
           posicao = posicao + resolution;
           //stepper.step(1);
@@ -199,9 +207,9 @@ void loop()
           //         Máximo : (Max)
 
           Serial.print("Direita  \n"); // TEST PROTOBOARD
-          delay(2000); // TEST PROTOBOARD
+          delay(velocidade_botton); // TEST PROTOBOARD
         }
-        else if (left == 1 and digitalRead(fcl) == LOW)
+        else if (left == 0 and digitalRead(fcl) == HIGH)
         {
           posicao = posicao - resolution;
           //stepper.step(-1);
@@ -210,7 +218,7 @@ void loop()
           //         Máximo : (Max)
 
           Serial.print("Esquerda  \n"); // TEST PROTOBOARD
-          delay(2000); // TEST PROTOBOARD
+          delay(velocidade_botton); // TEST PROTOBOARD
         }
         else
         {
@@ -220,14 +228,13 @@ void loop()
         break;
     }
   }
-  right = 0;
-  left = 0;
-  go = 0;
-  bmode = 0;
+  right = 1;
+  left = 1;
+  go = 1;
+  bmode = 1;
 
   right = botton_status(botton_right, status_br);
   left = botton_status(botton_left, status_bl);
   go = botton_status(botton_go, status_go);
   bmode = botton_status(botton_mode, status_mode);
-
 }
