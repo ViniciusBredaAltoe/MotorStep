@@ -17,6 +17,8 @@ const int fcl = 24; // Fim de curso Left
 
 void keyboardRead();
 int Initialization();
+void ImprimeAutomatico();
+void ImprimeManual();
 
 // =============================================================== Variaveis Externas =====================================================
 
@@ -33,6 +35,9 @@ const int resolution = 2; //Averiguar!!
 // =============================================================== Variáveis Internas =====================================================
 
 int status1;
+int continuaright;
+int continualeft;
+const int velocidadebotao = 150;
 int locus; // Destino desejado
 int posicao; // Posição atual
 int Max; // Distancia máxima da origem [mm]
@@ -55,6 +60,7 @@ void setup()
   pinMode(fcl, INPUT_PULLUP);
   pinMode(10, OUTPUT); //BackLight
   digitalWrite(10, HIGH);
+
   stepper.setSpeed(motorspeed);
   status1 = 0;
 
@@ -69,17 +75,21 @@ void loop()
   if (status1 == 0) // Verifica se a inicialização ja foi feita (0 = sim e 1 = não)
   {
     Max = Initialization();
+
     disp.begin(16, 2);                                   //Inicializa LCD 16 x 2
     disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
     disp.print("Distancia Max:");                        //Imprime mensagem
     disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
     disp.print(Max);                                     //Imprime mensagem
+
     mode = 0;
     posicao = 0;
     delay(2000);
     status1 = 1;
   }
-  keyboardRead();
+
+  keyboardRead(); // Faz a leitura dos estados dos botoes
+
   if (select == 0x01)
   {
     select = 0x00;
@@ -89,62 +99,62 @@ void loop()
   {
     case 0: // Nenhum modo selecionado
 
-      disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
+      disp.setCursor(0, 0);                                  //Posiciona cursor na coluna 1, linha 1
       disp.print("Escolha o modo: ");                        //Imprime mensagem
-      disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
+      disp.setCursor(0, 1);                                  //Posiciona cursor na coluna 1, linha 2
       disp.print("L:Manual R:Auto ");
 
       if (right == 0x01) {
         right = 0x00;
+
         disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Modo Automatico ");                        //Imprime mensagem
+        disp.print("Modo Automatico ");                      //Imprime mensagem
         disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
         disp.print("Escolhido.      ");
+
         mode = 1;
         locus = posicao;
         delay(1000);
+
+        ImprimeAutomatico(posicao, locus);                   //Imprime mensagem - Automatico
+
       }
       if (left == 0x01) {
         left = 0x00;
         disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Modo Manual     ");                        //Imprime mensagem
+        disp.print("Modo Manual     ");                      //Imprime mensagem
         disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-        disp.print("Escolhido.      ");
+        disp.print("Escolhido.      ");                      //Imprime mensagem - Manual
+
         mode = 2;
         delay(1000);
+
+        ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
+
       }
       break;
 
     // -----------------------------------------------------------= Modo Automático =---------------------------------------------------
 
     case 1: // Modo Automático
-      if (right == 0x01 and digitalRead(fcr) == HIGH and locus < Max)
+      if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
+      if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
+      
+      if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and locus < Max)
       {
-        right = 0x00;
+        if (continuaright == 1) delay(velocidadebotao);
         locus = locus + resolution;
 
-        disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Posicao:        ");                      //Imprime mensagem
-        disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
-        disp.print(posicao);                                 //Imprime mensagem
-        disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-        disp.print("Destino:        ");                      //Imprime mensagem
-        disp.setCursor(8, 1);                                //Posiciona cursor na coluna 9, linha 1
-        disp.print(locus);                                   //Imprime mensagem
+        ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+
       }
-      else if (left == 0x01 and digitalRead(fcl) == HIGH and locus > 1)
+      else if ((left == 0x01 or continualeft == 1) and digitalRead(fcl) == HIGH and locus > 1)
       {
-        left = 0x00;
+        if (continualeft == 1) delay(velocidadebotao);
         locus = locus - resolution;
 
-        disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Posicao:        ");                      //Imprime mensagem
-        disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
-        disp.print(posicao);                                 //Imprime mensagem
-        disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-        disp.print("Destino:        ");                      //Imprime mensagem
-        disp.setCursor(8, 1);                                //Posiciona cursor na coluna 9, linha 1
-        disp.print(locus);                                   //Imprime mensagem
+        ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+
       }
       else if (up == 0x01)
       {
@@ -153,14 +163,7 @@ void loop()
         {
           posicao = posicao + resolution;
 
-          disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-          disp.print("Posicao:        ");                      //Imprime mensagem
-          disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
-          disp.print(posicao);                                 //Imprime mensagem
-          disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-          disp.print("Destino:        ");                      //Imprime mensagem
-          disp.setCursor(8, 1);                                //Posiciona cursor na coluna 9, linha 1
-          disp.print(locus);                                   //Imprime mensagem
+          ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
 
           //stepper.step(1); // Vai para a direita
@@ -170,59 +173,68 @@ void loop()
         {
           posicao = posicao - resolution;
 
-          disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-          disp.print("Posicao:        ");                      //Imprime mensagem
-          disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
-          disp.print(posicao);                                 //Imprime mensagem
-          disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-          disp.print("Destino:        ");                      //Imprime mensagem
-          disp.setCursor(8, 1);                                //Posiciona cursor na coluna 9, linha 1
-          disp.print(locus);                                   //Imprime mensagem
+          ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+
         }
       }
-     
+
       break;
 
     // -------------------------------------------------------------= Modo Manual =-----------------------------------------------------
 
     case 2: // Modo Manual
-
-      //PRINTAR: Position: (posicao)
-      //         Máximo : (Max)
-
-      if (right == 0x01 and digitalRead(fcr) == HIGH and (posicao<Max))
+      if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
+      if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
+      
+      if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and (posicao < Max))
       {
-        right = 0x00;
+        if (continuaright == 1) delay(velocidadebotao);
         posicao = posicao + resolution;
+
         //stepper.step(1);
 
-        disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Posicao:        ");                      //Imprime mensagem
-        disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
-        disp.print(posicao);                                 //Imprime mensagem
-        disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-        disp.print("Maximo:         ");                      //Imprime mensagem
-        disp.setCursor(7, 1);                                //Posiciona cursor na coluna 8, linha 1
-        disp.print(Max);                                     //Imprime mensagem
+        ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
 
       }
-      else if (left == 0x01 and digitalRead(fcl) == HIGH and (posicao>1))
+      else if ((left == 0x01 or continualeft == 1) and digitalRead(fcl) == HIGH and (posicao > 1))
       {
-        left = 0x00;
+        if (continualeft == 1) delay(velocidadebotao);
         posicao = posicao - resolution;
+
         //stepper.step(-1);
 
-        disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Posicao:        ");                      //Imprime mensagem
-        disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
-        disp.print(posicao);                                 //Imprime mensagem
-        disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-        disp.print("Maximo:         ");                      //Imprime mensagem
-        disp.setCursor(7, 1);                                //Posiciona cursor na coluna 8, linha 1
-        disp.print(Max);                                     //Imprime mensagem
+        ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
       }
       break;
   }
+}
+
+// ============================================================ IMPRIME AUTOMATICO ===================================================
+
+void ImprimeAutomatico(int posicao, int locus)
+{
+  disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
+  disp.print("Posicao:        ");                      //Imprime mensagem
+  disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
+  disp.print(posicao);                                 //Imprime mensagem
+  disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
+  disp.print("Destino:        ");                      //Imprime mensagem
+  disp.setCursor(8, 1);                                //Posiciona cursor na coluna 9, linha 1
+  disp.print(locus);                                   //Imprime mensagem
+}
+
+// ============================================================== IMPRIME MANUAL =====================================================
+
+void ImprimeManual(int posicao, int Max)
+{
+  disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
+  disp.print("Posicao:        ");                      //Imprime mensagem
+  disp.setCursor(8, 0);                                //Posiciona cursor na coluna 9, linha 1
+  disp.print(posicao);                                 //Imprime mensagem
+  disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
+  disp.print("Maximo:         ");                      //Imprime mensagem
+  disp.setCursor(7, 1);                                //Posiciona cursor na coluna 8, linha 1
+  disp.print(Max);
 }
 
 // ================================================================== BOTOES =========================================================
@@ -232,22 +244,30 @@ void keyboardRead()
   adc_value = analogRead(A0);                       //Variável para leitura recebe valor AD de A0
 
   // --- Testa se os botões foram pressionados ---
+
   // Se foi pressionado, seta a respectiva flag
-  if      (adc_value <  50)                    butt01 = 0x01;
+  if      (adc_value <  75)
+  {
+
+    butt01 = 0x01;
+    continuaright = 1;
+  }
   else if (adc_value > 103 && adc_value < 200) butt02 = 0x01;
   else if (adc_value > 250 && adc_value < 380) butt03 = 0x01;
-  else if (adc_value > 450 && adc_value < 550) butt04 = 0x01;
+  else if (adc_value > 450 && adc_value < 550)
+  {
+    butt04 = 0x01;
+    continualeft = 1;
+  }
   else if (adc_value > 650 && adc_value < 750) butt05 = 0x01;
 
-
-
-  // --- Testa se os botões foram liberados ---
-  //
-  if (adc_value > 50 && butt01)             //Botão right solto e flag butt01 setada?
+  // --- Testa se os botões foram liberados --- & --- Testa se Left ou Right continuam pressionados ---
+  if (adc_value > 75 && butt01)             //Botão right solto e flag butt01 setada?
   { //Sim...
     butt01 = 0x00;                        //Limpa flag butt01
     right  = 0x01;                        //Seta flag right
-
+    continuaright = 0;
+    
   } //end right
   if (adc_value > 200 && butt02)            //Botão up solto e flag butt02 setada?
   { //Sim...
@@ -265,6 +285,7 @@ void keyboardRead()
   { //Sim...
     butt04 = 0x00;                        //Limpa flag butt04
     left   = 0x01;                        //Seta flag left
+    continualeft = 0;
 
   } //end left
   if (adc_value > 750 && butt05)            //Botão select solto e flag butt05 setada?
@@ -273,6 +294,7 @@ void keyboardRead()
     select   = 0x01;                        //Seta flag select
 
   } //end select
+
 }
 
 // ================================================================= INICIALIZAÇÃO ========================================================
@@ -285,7 +307,7 @@ int Initialization()
   {
     //stepper.step(1); // Vai para a direita
     Serial.print("Inicialização Direita \n"); // TEST PROTOBOARD
-    delay(1000); // TEST PROTOBOARD
+    delay(10); // TEST PROTOBOARD
 
   }
   while (digitalRead(fcl) == HIGH)
@@ -293,13 +315,9 @@ int Initialization()
     //stepper.step(-1); // Vai para a esquerda
     cont++;
     Serial.print("Inicialização Esquerda  \n"); // TEST PROTOBOARD
-    delay(1000); // TEST PROTOBOARD
+    delay(10); // TEST PROTOBOARD
   }
   //Printar Cont
   Dmax = cont * resolution;
   return Dmax;
 }
-
-
-
-
