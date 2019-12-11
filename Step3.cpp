@@ -1,17 +1,20 @@
+
 #include <LiquidCrystal.h>                              //Biblioteca para o display LCD
-#include <Stepper.h>                                    //Biblioteca para o motor de passo
-
-#define STEPS 100
-#define motorspeed 30 // set the speed of the motor to 30 RPMs
+#include <Stepper.h> //Biblioteca para o motor de passo
 
 
-Stepper stepper(STEPS, 8, 9, 10, 11);
+
+#define STEPS 2050     //Number of steps for revolution
+#define motorspeed 3   // set the speed of the motor to 30 RPMs
+
+
+
 
 
 // =============================================================== Acerto da Pinagem ======================================================
 
-const int fcr = 22; // Fim de curso Right
-const int fcl = 24; // Fim de curso Left
+#define fcr A3 // Fim de curso Right
+#define fcl A2 // Fim de curso Left
 
 // ======================================================== Protótipo das Funções Auxiliares ==============================================
 
@@ -30,17 +33,17 @@ boolean right  = 0x00, butt01 = 0x00,
         left   = 0x00, butt04 = 0x00,
         select = 0x00, butt05 = 0x00;
 
-const int resolution = 2; //Averiguar!!
+const float resolution = 0.425; //665 passos para 282mm => 282/665 = 0.425
 
 // =============================================================== Variáveis Internas =====================================================
 
 int status1;
 int continuaright;
 int continualeft;
-const int velocidadebotao = 150;
-int locus; // Destino desejado
-int posicao; // Posição atual
-int Max; // Distancia máxima da origem [mm]
+const int velocidadebotao = 50;
+float locus; // Destino desejado
+float posicao; // Posição atual
+float Max; // Distancia máxima da origem [mm]
 int mode; // Modo de operação (0, 1 ou 2)
 
 // ================================================================= HARDWARE DO LCD ======================================================
@@ -56,15 +59,17 @@ LiquidCrystal disp(8,  //RS no digital 8
 
 void setup()
 {
-  pinMode(fcr, INPUT_PULLUP);
-  pinMode(fcl, INPUT_PULLUP);
-  pinMode(10, OUTPUT); //BackLight
+  pinMode(A5, OUTPUT);
+  pinMode(A4, OUTPUT);
+  pinMode(A3, INPUT_PULLUP);
+  pinMode(A2, INPUT_PULLUP);
+  pinMode(10, OUTPUT);  //BackLight
   digitalWrite(10, HIGH);
 
-  stepper.setSpeed(motorspeed);
+  // stepper.setSpeed(motorspeed);
   status1 = 0;
 
-  Serial.begin(9600); // TEST PROTOBOARD
+  // Serial.begin(9600); // TEST PROTOBOARD
 
 } //end setup
 
@@ -139,7 +144,7 @@ void loop()
     case 1: // Modo Automático
       if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
       if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
-      
+
       if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and locus < Max)
       {
         if (continuaright == 1) delay(velocidadebotao);
@@ -165,7 +170,7 @@ void loop()
 
           ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
-
+          Direita(1);
           //stepper.step(1); // Vai para a direita
 
         }
@@ -174,7 +179,8 @@ void loop()
           posicao = posicao - resolution;
 
           ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
-
+          
+          Esquerda(1);
         }
       }
 
@@ -185,12 +191,13 @@ void loop()
     case 2: // Modo Manual
       if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
       if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
-      
+
       if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and (posicao < Max))
       {
         if (continuaright == 1) delay(velocidadebotao);
         posicao = posicao + resolution;
-
+        
+        Direita(1);
         //stepper.step(1);
 
         ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
@@ -200,7 +207,8 @@ void loop()
       {
         if (continualeft == 1) delay(velocidadebotao);
         posicao = posicao - resolution;
-
+        
+        Esquerda(1);
         //stepper.step(-1);
 
         ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
@@ -267,7 +275,7 @@ void keyboardRead()
     butt01 = 0x00;                        //Limpa flag butt01
     right  = 0x01;                        //Seta flag right
     continuaright = 0;
-    
+
   } //end right
   if (adc_value > 200 && butt02)            //Botão up solto e flag butt02 setada?
   { //Sim...
@@ -305,19 +313,56 @@ int Initialization()
   int cont = 0;
   while (digitalRead(fcr) == HIGH)
   {
+    Direita(1);
     //stepper.step(1); // Vai para a direita
-    Serial.print("Inicialização Direita \n"); // TEST PROTOBOARD
-    delay(10); // TEST PROTOBOARD
+    // Serial.print("Inicialização Direita \n"); // TEST PROTOBOARD
+    //delay(10); // TEST PROTOBOARD
 
   }
   while (digitalRead(fcl) == HIGH)
   {
+    Esquerda(1);
     //stepper.step(-1); // Vai para a esquerda
     cont++;
-    Serial.print("Inicialização Esquerda  \n"); // TEST PROTOBOARD
-    delay(10); // TEST PROTOBOARD
+    // Serial.print("Inicialização Esquerda  \n"); // TEST PROTOBOARD
+    //delay(10); // TEST PROTOBOARD
   }
   //Printar Cont
   Dmax = cont * resolution;
   return Dmax;
 }
+
+// ================================================================= DIREITA ========================================================
+
+void Direita(int passos)
+{
+  delay(10);
+  digitalWrite(A4, HIGH);
+  delay(10);
+  
+  for (int i = 0; i<passos; i++)
+  {
+      digitalWrite(A5, HIGH);   
+      delay(15);               
+      digitalWrite(A5, LOW);    
+      delay(15);               
+  }
+}
+
+// ================================================================= ESQUERDA ========================================================
+
+void Esquerda(int passos)
+{
+  delay(10);
+  digitalWrite(A4, LOW);
+  delay(10);
+  
+  for (int i = 0; i<passos; i++)
+  {
+      digitalWrite(A5, HIGH);   
+      delay(15);               
+      digitalWrite(A5, LOW);    
+      delay(15);               
+  }
+}
+
