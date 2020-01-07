@@ -59,14 +59,14 @@ LiquidCrystal disp(8,  //RS no digital 8
 
 void setup()
 {
-  pinMode(A5, OUTPUT);
-  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);  //Passo
+  pinMode(A4, OUTPUT);  //Sentido
   pinMode(A3, INPUT_PULLUP);
   pinMode(A2, INPUT_PULLUP);
   pinMode(10, OUTPUT);  //BackLight
   digitalWrite(10, HIGH);
 
-  // stepper.setSpeed(motorspeed);
+  
   status1 = 0;
 
   // Serial.begin(9600); // TEST PROTOBOARD
@@ -171,7 +171,6 @@ void loop()
           ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
           Direita(1);
-          //stepper.step(1); // Vai para a direita
 
         }
         while (posicao > locus)
@@ -198,7 +197,7 @@ void loop()
         posicao = posicao + resolution;
         
         Direita(1);
-        //stepper.step(1);
+        
 
         ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
 
@@ -209,7 +208,7 @@ void loop()
         posicao = posicao - resolution;
         
         Esquerda(1);
-        //stepper.step(-1);
+        
 
         ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
       }
@@ -314,7 +313,6 @@ int Initialization()
   while (digitalRead(fcr) == HIGH)
   {
     Direita(1);
-    //stepper.step(1); // Vai para a direita
     // Serial.print("Inicialização Direita \n"); // TEST PROTOBOARD
     //delay(10); // TEST PROTOBOARD
 
@@ -322,7 +320,6 @@ int Initialization()
   while (digitalRead(fcl) == HIGH)
   {
     Esquerda(1);
-    //stepper.step(-1); // Vai para a esquerda
     cont++;
     // Serial.print("Inicialização Esquerda  \n"); // TEST PROTOBOARD
     //delay(10); // TEST PROTOBOARD
