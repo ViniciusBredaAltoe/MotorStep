@@ -334,14 +334,14 @@ int Initialization()
 void Direita(int passos)
 {
   delay(10);
-  digitalWrite(A4, HIGH);
+  digitalWrite(A5, HIGH);
   delay(10);
   
   for (int i = 0; i<passos; i++)
   {
-      digitalWrite(A5, HIGH);   
+      digitalWrite(A4, HIGH);   
       delay(15);               
-      digitalWrite(A5, LOW);    
+      digitalWrite(A4, LOW);    
       delay(15);               
   }
 }
@@ -351,15 +351,14 @@ void Direita(int passos)
 void Esquerda(int passos)
 {
   delay(10);
-  digitalWrite(A4, LOW);
+  digitalWrite(A5, LOW);
   delay(10);
   
   for (int i = 0; i<passos; i++)
   {
-      digitalWrite(A5, HIGH);   
+      digitalWrite(A4, HIGH);   
       delay(15);               
-      digitalWrite(A5, LOW);    
+      digitalWrite(A4, LOW);    
       delay(15);               
   }
 }
-
