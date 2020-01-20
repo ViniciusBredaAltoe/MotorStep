@@ -28,19 +28,19 @@ void ImprimeManual();
 int adc_value = 0x00; // Armazena o valor digital do conversor AD
 
 boolean right  = 0x00, butt01 = 0x00,
-        up     = 0x00, butt02 = 0x00,
-        down   = 0x00, butt03 = 0x00,
-        left   = 0x00, butt04 = 0x00,
-        select = 0x00, butt05 = 0x00;
+up     = 0x00, butt02 = 0x00,
+down   = 0x00, butt03 = 0x00,
+left   = 0x00, butt04 = 0x00,
+select = 0x00, butt05 = 0x00;
 
-const float resolution = 0.425; //665 passos para 282mm => 282/665 = 0.425
+const float resolution = 0.053;//0.425; //5325 passos para 282mm => 282/5325 = 0.425
 
 // =============================================================== Variáveis Internas =====================================================
 
 int status1;
 int continuaright;
 int continualeft;
-const int velocidadebotao = 50;
+const int velocidadebotao = 25;
 float locus; // Destino desejado
 float posicao; // Posição atual
 float Max; // Distancia máxima da origem [mm]
@@ -49,11 +49,11 @@ int mode; // Modo de operação (0, 1 ou 2)
 // ================================================================= HARDWARE DO LCD ======================================================
 
 LiquidCrystal disp(8,  //RS no digital 8
-                   9,  //EN no digital 9
-                   4,  //D4 no digital 4
-                   5,  //D5 no digital 5
-                   6,  //D6 no digital 6
-                   7); //D7 no digital 7
+9,  //EN no digital 9
+4,  //D4 no digital 4
+5,  //D5 no digital 5
+6,  //D6 no digital 6
+7); //D7 no digital 7
 
 // ==================================================================== VOID SETUP ========================================================
 
@@ -66,7 +66,7 @@ void setup()
   pinMode(10, OUTPUT);  //BackLight
   digitalWrite(10, HIGH);
 
-  
+
   status1 = 0;
 
   // Serial.begin(9600); // TEST PROTOBOARD
@@ -102,117 +102,117 @@ void loop()
   }
   switch (mode)
   {
-    case 0: // Nenhum modo selecionado
+  case 0: // Nenhum modo selecionado
 
-      disp.setCursor(0, 0);                                  //Posiciona cursor na coluna 1, linha 1
-      disp.print("Escolha o modo: ");                        //Imprime mensagem
-      disp.setCursor(0, 1);                                  //Posiciona cursor na coluna 1, linha 2
-      disp.print("L:Manual R:Auto ");
+    disp.setCursor(0, 0);                                  //Posiciona cursor na coluna 1, linha 1
+    disp.print("Escolha o modo: ");                        //Imprime mensagem
+    disp.setCursor(0, 1);                                  //Posiciona cursor na coluna 1, linha 2
+    disp.print("L:Manual R:Auto ");
 
-      if (right == 0x01) {
-        right = 0x00;
+    if (right == 0x01) {
+      right = 0x00;
 
-        disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Modo Automatico ");                      //Imprime mensagem
-        disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-        disp.print("Escolhido.      ");
+      disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
+      disp.print("Modo Automatico ");                      //Imprime mensagem
+      disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
+      disp.print("Escolhido.      ");
 
-        mode = 1;
-        locus = posicao;
-        delay(1000);
+      mode = 1;
+      locus = posicao;
+      delay(1000);
 
-        ImprimeAutomatico(posicao, locus);                   //Imprime mensagem - Automatico
+      ImprimeAutomatico(posicao, locus);                   //Imprime mensagem - Automatico
 
-      }
-      if (left == 0x01) {
-        left = 0x00;
-        disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
-        disp.print("Modo Manual     ");                      //Imprime mensagem
-        disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
-        disp.print("Escolhido.      ");                      //Imprime mensagem - Manual
+    }
+    if (left == 0x01) {
+      left = 0x00;
+      disp.setCursor(0, 0);                                //Posiciona cursor na coluna 1, linha 1
+      disp.print("Modo Manual     ");                      //Imprime mensagem
+      disp.setCursor(0, 1);                                //Posiciona cursor na coluna 1, linha 2
+      disp.print("Escolhido.      ");                      //Imprime mensagem - Manual
 
-        mode = 2;
-        delay(1000);
+      mode = 2;
+      delay(1000);
 
-        ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
+      ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
 
-      }
-      break;
+    }
+    break;
 
     // -----------------------------------------------------------= Modo Automático =---------------------------------------------------
 
-    case 1: // Modo Automático
-      if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
-      if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
+  case 1: // Modo Automático
+    if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
+    if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
 
-      if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and locus < Max)
-      {
-        if (continuaright == 1) delay(velocidadebotao);
+    if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and locus < Max)
+    {
+      if (continuaright == 1) //delay(velocidadebotao);
         locus = locus + resolution;
 
-        ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+      ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
-      }
-      else if ((left == 0x01 or continualeft == 1) and digitalRead(fcl) == HIGH and locus > 1)
-      {
-        if (continualeft == 1) delay(velocidadebotao);
+    }
+    else if ((left == 0x01 or continualeft == 1) and digitalRead(fcl) == HIGH and locus > 1)
+    {
+      if (continualeft == 1) //delay(velocidadebotao);
         locus = locus - resolution;
 
+      ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+
+    }
+    else if (up == 0x01)
+    {
+      up = 0x00;
+      while (posicao < locus) // Vai para a direita
+      {
+        posicao = posicao + resolution;
+
         ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
+        Direita(1);
+
       }
-      else if (up == 0x01)
+      while (posicao > locus)
       {
-        up = 0x00;
-        while (posicao < locus) // Vai para a direita
-        {
-          posicao = posicao + resolution;
+        posicao = posicao - resolution;
 
-          ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+        ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
-          Direita(1);
-
-        }
-        while (posicao > locus)
-        {
-          posicao = posicao - resolution;
-
-          ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
-          
-          Esquerda(1);
-        }
+        Esquerda(1);
       }
+    }
 
-      break;
+    break;
 
     // -------------------------------------------------------------= Modo Manual =-----------------------------------------------------
 
-    case 2: // Modo Manual
-      if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
-      if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
+  case 2: // Modo Manual
+    if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
+    if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
 
-      if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and (posicao < Max))
-      {
-        if (continuaright == 1) delay(velocidadebotao);
+    if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and (posicao < Max))
+    {
+      if (continuaright == 1) //delay(velocidadebotao);
         posicao = posicao + resolution;
-        
-        Direita(1);
-        
 
-        ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
+      Direita(1);
 
-      }
-      else if ((left == 0x01 or continualeft == 1) and digitalRead(fcl) == HIGH and (posicao > 1))
-      {
-        if (continualeft == 1) delay(velocidadebotao);
+
+      ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
+
+    }
+    else if ((left == 0x01 or continualeft == 1) and digitalRead(fcl) == HIGH and (posicao > 1))
+    {
+      if (continualeft == 1) //delay(velocidadebotao);
         posicao = posicao - resolution;
-        
-        Esquerda(1);
-        
 
-        ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
-      }
-      break;
+      Esquerda(1);
+
+
+      ImprimeManual(posicao, Max);                         //Imprime mensagem - Manual
+    }
+    break;
   }
 }
 
@@ -250,7 +250,7 @@ void keyboardRead()
 {
   adc_value = analogRead(A0);                       //Variável para leitura recebe valor AD de A0
 
-  // --- Testa se os botões foram pressionados ---
+    // --- Testa se os botões foram pressionados ---
 
   // Se foi pressionado, seta a respectiva flag
   if      (adc_value <  75)
@@ -313,16 +313,12 @@ int Initialization()
   while (digitalRead(fcr) == HIGH)
   {
     Direita(1);
-    // Serial.print("Inicialização Direita \n"); // TEST PROTOBOARD
-    //delay(10); // TEST PROTOBOARD
 
   }
   while (digitalRead(fcl) == HIGH)
   {
     Esquerda(1);
     cont++;
-    // Serial.print("Inicialização Esquerda  \n"); // TEST PROTOBOARD
-    //delay(10); // TEST PROTOBOARD
   }
   //Printar Cont
   Dmax = cont * resolution;
@@ -333,16 +329,16 @@ int Initialization()
 
 void Direita(int passos)
 {
-  delay(10);
-  digitalWrite(A5, HIGH);
-  delay(10);
-  
+  delay(1);
+  digitalWrite(A4, HIGH);
+  delay(1);
+
   for (int i = 0; i<passos; i++)
   {
-      digitalWrite(A4, HIGH);   
-      delay(15);               
-      digitalWrite(A4, LOW);    
-      delay(15);               
+    digitalWrite(A5, HIGH);   
+    //delay(1);               
+    digitalWrite(A5, LOW);    
+    //delay(1);               
   }
 }
 
@@ -350,15 +346,17 @@ void Direita(int passos)
 
 void Esquerda(int passos)
 {
-  delay(10);
-  digitalWrite(A5, LOW);
-  delay(10);
-  
+  delay(1);
+  digitalWrite(A4, LOW);
+  delay(1);
+
   for (int i = 0; i<passos; i++)
   {
-      digitalWrite(A4, HIGH);   
-      delay(15);               
-      digitalWrite(A4, LOW);    
-      delay(15);               
+    digitalWrite(A5, HIGH);   
+    delay(1);               
+    digitalWrite(A5, LOW);    
+    delay(1);               
   }
 }
+
+
