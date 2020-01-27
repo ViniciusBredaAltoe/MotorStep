@@ -1,4 +1,3 @@
-
 #include <LiquidCrystal.h>                              //Biblioteca para o display LCD
 #include <Stepper.h> //Biblioteca para o motor de passo
 
@@ -147,7 +146,7 @@ void loop()
     if (continuaright == 0) right = 0x00; // Se o botão right não estiver apertado, ele não precisa ir pra direita.
     if (continualeft == 0) left = 0x00;   // Se o botão left não estiver apertado, ele não precisa ir pra esquerda.
 
-    if ((right == 0x01 or continuaright == 1) and digitalRead(fcr) == HIGH and locus < Max)
+    if (right == 0x01 or continuaright == 1) 
     {
       if (continuaright == 1) //delay(velocidadebotao);
         locus = locus + resolution;
@@ -155,7 +154,7 @@ void loop()
       ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
     }
-    else if ((left == 0x01 or continualeft == 1) and digitalRead(fcl) == HIGH and locus > 1)
+    else if (left == 0x01 or continualeft == 1)
     {
       if (continualeft == 1) //delay(velocidadebotao);
         locus = locus - resolution;
@@ -166,16 +165,37 @@ void loop()
     else if (up == 0x01)
     {
       up = 0x00;
-      while (posicao < locus) // Vai para a direita
+      // ------------------------------------------- VELOCIDADE RAPIDA --------------------------
+
+      while (posicao < locus-5 and locus < Max) // Vai para a direita
       {
-        posicao = posicao + 2*resolution;
+        posicao = posicao + 4*resolution;
 
         ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
-        Direita(2);
+        Direita(4);
 
       }
-      while (posicao > locus)
+      while (posicao > locus+5 and locus >= 0)
+      {
+        posicao = posicao - 4*resolution;
+
+        ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+
+        Esquerda(4);
+      }
+      // ------------------------------------------- VELOCIDADE NORMAL --------------------------
+
+      while (posicao < locus and locus < Max) // Vai para a direita
+      {
+        posicao = posicao + resolution;
+
+        ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
+
+        Direita(1);
+
+      }
+      while (posicao > locus and locus >= 0)
       {
         posicao = posicao - resolution;
 
@@ -320,7 +340,7 @@ int Initialization()
   while (digitalRead(fcl) == HIGH)
   {
     Esquerda(1);
-  //  cont++;
+    //  cont++;
   }
   //Dmax = cont * resolution;
   //return Dmax;
@@ -360,5 +380,3 @@ void Esquerda(int passos)
     delay(1);               
   }
 }
-
-
