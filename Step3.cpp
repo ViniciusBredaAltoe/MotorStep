@@ -22,6 +22,8 @@ void keyboardRead();
 int Initialization();
 void ImprimeAutomatico();
 void ImprimeManual();
+void Direita();
+void Esquerda();
 
 // =============================================================== Variaveis Externas =====================================================
 
@@ -166,11 +168,11 @@ void loop()
       up = 0x00;
       while (posicao < locus) // Vai para a direita
       {
-        posicao = posicao + resolution;
+        posicao = posicao + 2*resolution;
 
         ImprimeAutomatico(posicao, locus);                         //Imprime mensagem - Automatico
 
-        Direita(1);
+        Direita(2);
 
       }
       while (posicao > locus)
@@ -308,21 +310,21 @@ void keyboardRead()
 
 int Initialization()
 {
-  int Dmax;
-  int cont = 0;
-  while (digitalRead(fcr) == HIGH)
-  {
-    Direita(1);
+  //int Dmax;
+  //int cont = 0;
+  //while (digitalRead(fcr) == HIGH)
+  //{
+  //  Direita(1);
 
-  }
+  //}
   while (digitalRead(fcl) == HIGH)
   {
     Esquerda(1);
-    cont++;
+  //  cont++;
   }
-  //Printar Cont
-  Dmax = cont * resolution;
-  return Dmax;
+  //Dmax = cont * resolution;
+  //return Dmax;
+  return 282;
 }
 
 // ================================================================= DIREITA ========================================================
